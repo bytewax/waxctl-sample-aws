@@ -14,6 +14,8 @@ from bytewax.outputs import StdOutputConfig
 from bytewax.recovery import SqliteRecoveryConfig
 from bytewax.window import SystemClockConfig, TumblingWindowConfig
 
+ENVIRONMENT = os.getenv("ENVIRONMENT", None)
+
 def input_builder(worker_index, worker_count, resume_state):
     # Multiple SSE connections will duplicate the streams, so only
     # have the first worker generate input.
@@ -44,7 +46,12 @@ def keep_max(max_count, new_count):
 
 
 flow = Dataflow()
-flow.input("inp", ManualInputConfig(input_builder))
+if ENVIRONMENT in ["TEST", "DEV"]:
+    with open("test_data.txt") as f:
+        inp = f.read().splitlines()
+    flow.input("inp", TestingInputConfig(inp))
+else:
+    flow.input("inp", ManualInputConfig(input_builder))
 flow.inspect(print)
 flow.map(json.loads)
 flow.map(initial_count)
