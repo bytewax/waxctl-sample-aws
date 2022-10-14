@@ -58,7 +58,7 @@ flow.map(initial_count)
 flow.reduce_window(
     "sum",
     SystemClockConfig(),
-    TumblingWindowConfig(length=timedelta(seconds=1)),
+    TumblingWindowConfig(length=timedelta(seconds=2)),
     operator.add,
 )
 # ("server.name", sum_per_window)
