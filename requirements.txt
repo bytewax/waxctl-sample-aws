@@ -1,0 +1,3 @@
+sseclient-py
+urllib3
+pytest
