@@ -52,7 +52,6 @@ if ENVIRONMENT in ["TEST", "DEV"]:
     flow.input("inp", TestingInputConfig(inp))
 else:
     flow.input("inp", ManualInputConfig(input_builder))
-flow.inspect(print)
 flow.map(json.loads)
 flow.map(initial_count)
 flow.reduce_window(
