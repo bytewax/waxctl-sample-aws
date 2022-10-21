@@ -22,6 +22,14 @@ jobs:
         brew tap bytewax/tap
         brew install waxctl
 
+    - name: Waxctl Cleanup
+      run: |
+        flow=$(waxctl aws ls | grep wikievents | awk '{print $1;}')
+        if [ "$flow" = "wikievents" ];
+        then
+          waxctl aws delete --name wikievents --yes
+        fi;
+
     - name: Waxctl Deploy
       run: |
         waxctl aws deploy dataflow.py \ 
