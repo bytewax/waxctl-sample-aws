@@ -2,7 +2,6 @@ jobs:
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     permissions:
       id-token: write
       contents: read
@@ -26,5 +25,5 @@ jobs:
     - name: Waxctl Deploy
       run: |
         waxctl aws deploy dataflow.py \ 
-        --name my-dataflow \ 
+        --name wikievents \ 
         --requirements-file-name requirements.txt
