@@ -1,3 +1,5 @@
+name: Waxctl Deploy to AWS
+
 on:
   workflow_dispatch:
     inputs:
@@ -33,6 +35,9 @@ jobs:
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         brew tap bytewax/tap
         brew install waxctl
+
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
 
     - name: Waxctl Deploy
       run: |
