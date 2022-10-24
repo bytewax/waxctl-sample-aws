@@ -39,9 +39,9 @@ jobs:
         flow=$(waxctl aws ls | grep wikievents | awk '{print $1;}')
         if [ "$flow" = "wikievents" ];
         then
-          waxctl aws stop --name wikievents --yes
+          waxctl aws delete --name wikievents --yes
           sleep 5
-          waxctl aws start --name "wikievents" --yes
+          waxctl aws rm --name "wikievents" --yes
         else
           waxctl aws deploy \
           https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}/dataflow.py \
