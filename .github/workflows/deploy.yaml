@@ -1,3 +1,10 @@
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (staging or production)'
+        required: true
+        default: 'staging'
 jobs:
   deploy:
     name: Deploy to EC2
@@ -6,6 +13,11 @@ jobs:
       id-token: write
       contents: read
     steps:
+    - run: |
+          echo "deployment on ${{ github.event.inputs.environment }}"
+          echo "dataflow deployed: https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/dataflow.py"
+          echo "requirements used: https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/requirements.txt"
+
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -22,16 +34,19 @@ jobs:
         brew tap bytewax/tap
         brew install waxctl
 
-    - name: Waxctl Cleanup
+    - name: Waxctl Deploy
       run: |
         flow=$(waxctl aws ls | grep wikievents | awk '{print $1;}')
         if [ "$flow" = "wikievents" ];
         then
-          waxctl aws delete --name wikievents --yes
+          waxctl aws stop --name wikievents --yes
+          sleep 5
+          waxctl aws start --name "wikievents" --yes
+        else
+          waxctl aws deploy \
+          https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/dataflow.py \
+          --requirements-file-name https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/requirements.txt \
+          --name wikievents
         fi;
-
-    - name: Waxctl Deploy
-      run: |
-        waxctl aws deploy dataflow.py \ 
-        --name wikievents \ 
-        --requirements-file-name requirements.txt
+        sleep 10
+        waxctl aws ls --verbose
