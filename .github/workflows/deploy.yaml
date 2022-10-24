@@ -15,8 +15,8 @@ jobs:
     steps:
     - run: |
           echo "deployment on ${{ github.event.inputs.environment }}"
-          echo "dataflow deployed: https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/dataflow.py"
-          echo "requirements used: https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/requirements.txt"
+          echo "dataflow deployed: https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}/dataflow.py"
+          echo "requirements used: https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}/requirements.txt"
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -44,8 +44,8 @@ jobs:
           waxctl aws start --name "wikievents" --yes
         else
           waxctl aws deploy \
-          https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/dataflow.py \
-          --requirements-file-name https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}"/requirements.txt \
+          https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}/dataflow.py \
+          --requirements-file-name https://raw.githubusercontent.com/waxctl-sample-aws/${{ github.sha }}/requirements.txt \
           --name wikievents
         fi;
         sleep 10
