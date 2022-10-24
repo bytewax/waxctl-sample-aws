@@ -41,12 +41,13 @@ jobs:
 
     - name: Waxctl Deploy
       run: |
+        alias waxctl=/home/linuxbrew/.linuxbrew/bin/waxctl
         flow=$(waxctl aws ls | grep wikievents | awk '{print $1;}')
         if [ "$flow" = "wikievents" ];
         then
           waxctl aws delete --name wikievents --yes
           sleep 5
-          waxctl aws rm --name "wikievents" --yes
+          waxctl aws rm --name wikievents --yes
         else
           waxctl aws deploy \
           https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/dataflow.py \
