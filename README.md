@@ -218,7 +218,7 @@ If you have cloudwatch enabled, you will automatically get access to the logs an
 waxctl aws ls --verbose
 ```
 
-Scrolling down to the “logs” section you will find a URL. You need to be authenticated in your AWS dashboard, but once you are, you can simply click the link and see the cloudwatch logs for your instance.
+Scrolling down to the “logs” section you will find a URL. You need to be authenticated in your AWS management console, but once you are, you can simply click the link and see the cloudwatch logs for your instance.
 
 ```
 "logs": "https://us-east-2.console.aws.amazon.com/cloudwatch/home?region=us-east-2#logsV2:log-groups/log-group/$252Fbytewax$252Fsyslog/log-events/wikievents$3FfilterPattern$3Dbytewax"
