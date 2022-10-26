@@ -36,9 +36,6 @@ jobs:
         brew tap bytewax/tap
         brew install waxctl
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-
     - name: Waxctl Deploy
       run: |
         alias waxctl=/home/linuxbrew/.linuxbrew/bin/waxctl
