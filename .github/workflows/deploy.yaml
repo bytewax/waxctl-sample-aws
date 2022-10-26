@@ -43,20 +43,20 @@ jobs:
         cat <<EOF >> $HOME/.waxctl/config.yaml
         collect_telemetry: true
         EOF
-        flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
-        if [ "$flow" = "wikievents" ];
+        flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wiki-events | awk '{print $1;}')
+        if [ "$flow" = "wiki-events" ];
         then
-          /home/linuxbrew/.linuxbrew/bin/waxctl aws delete --name wikievents --yes --debug
-          while ["$flow" = "wikievents"]
+          /home/linuxbrew/.linuxbrew/bin/waxctl aws delete --name wiki-events --yes --debug
+          while ["$flow" = "wiki-events"]
           do
-            flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
+            flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wiki-events | awk '{print $1;}')
             sleep 2
           done
         fi;
         /home/linuxbrew/.linuxbrew/bin/waxctl aws deploy \
         https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/dataflow.py \
         --requirements-file-name https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/requirements.txt \
-        --name wikievents \
+        --name wiki-events \
         --debug
         sleep 5
         /home/linuxbrew/.linuxbrew/bin/waxctl aws ls --verbose
