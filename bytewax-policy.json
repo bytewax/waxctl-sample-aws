@@ -10,6 +10,17 @@
                     "ec2:Region": "us-east-2"
                 }
             }
-        }
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreatePolicy",
+                "iam:CreateInstanceProfile",
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:CreatePolicyVersion"
+            ],
+            "Resource": "*"
+        }      
     ]
 }
