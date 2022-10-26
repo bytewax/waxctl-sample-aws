@@ -35,6 +35,8 @@ jobs:
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         brew tap bytewax/tap
         brew install waxctl
+        mkdir ~/.waxctl
+        echo "collect_telemetry: true" > ~/.waxctl/config.yaml
 
     - name: Waxctl Deploy
       run: |
@@ -57,4 +59,4 @@ jobs:
         --name wikievents \
         --debug
         sleep 5
-        waxctl aws ls --verbose
+        /home/linuxbrew/.linuxbrew/bin/waxctl aws ls --verbose
