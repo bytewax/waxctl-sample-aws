@@ -38,18 +38,20 @@ jobs:
 
     - name: Waxctl Deploy
       run: |
-        alias waxctl=/home/linuxbrew/.linuxbrew/bin/waxctl
-        flow=$(waxctl aws ls | grep wikievents | awk '{print $1;}')
+        flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
         if [ "$flow" = "wikievents" ];
         then
-          waxctl aws delete --name wikievents --yes
-          sleep 5
-          waxctl aws rm --name wikievents --yes
-        else
-          waxctl aws deploy \
-          https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/dataflow.py \
-          --requirements-file-name https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/requirements.txt \
-          --name wikievents
+          /home/linuxbrew/.linuxbrew/bin/waxctl aws delete --name wikievents --yes --debug
+          while ["$flow" = "wikievents"]
+          do
+            flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
+            sleep 2
+          done
         fi;
-        sleep 10
+        /home/linuxbrew/.linuxbrew/bin/waxctl aws deploy \
+        https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/dataflow.py \
+        --requirements-file-name https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/requirements.txt \
+        --name wikievents \
+        --debug
+        sleep 5
         waxctl aws ls --verbose

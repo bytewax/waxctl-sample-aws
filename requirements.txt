@@ -1,4 +1,0 @@
-sseclient-py
-urllib3
-bytewax==0.12.0
-pytest
