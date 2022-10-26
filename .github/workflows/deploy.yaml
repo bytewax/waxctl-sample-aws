@@ -38,7 +38,9 @@ jobs:
 
     - name: Waxctl Deploy
       run: |
-        echo "collect_telemetry: true" > ~/.waxctl/config.yaml
+        cat <<EOF >> $HOME/.waxctl/config.yaml
+        collect_telemetry: true
+        EOF
         flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
         if [ "$flow" = "wikievents" ];
         then
