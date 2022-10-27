@@ -23,7 +23,12 @@
                 "iam:TagRole",
                 "iam:TagInstanceProfile",
                 "iam:AddRoleToInstanceProfile",
-                "iam:PassRole"
+                "iam:PassRole",
+                "iam:RemoveRoleFromInstanceProfile",
+                "iam:DeleteInstanceProfile",
+                "iam:DetachRolePolicy",
+                "iam:DeleteRole",
+                "iam:DeletePolicy"
             ],
             "Resource": "*"
         }
