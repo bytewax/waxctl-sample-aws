@@ -44,7 +44,7 @@ jobs:
         if [ "$flow" = "wikievents" ];
         then
           /home/linuxbrew/.linuxbrew/bin/waxctl aws delete --name wikievents --yes --debug
-          while ["$flow" = "wikievents"]
+          while [ "$flow" = "wikievents" ]
           do
             flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
             sleep 2
