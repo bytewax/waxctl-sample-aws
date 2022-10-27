@@ -1,6 +1,6 @@
-# Wax on Wax off - AWS flavor
+# Wax on Wax off - Deploying dataflows on AWS with GitHub Actions
 
-We will eventually get to the tutorial on getting your dataflow production ready and deploying your dataflow to AWS with GitHub Actions, but first, a bit about why we built Waxctl, and what it is.
+We will get to the tutorial on getting your dataflow production ready and deploying it to AWS with GitHub Actions, but first, a bit about why we built Waxctl, and what it is.
 
 Waxctl is the Bytewax command line interface that simplifies deployment and management of Bytewax dataflows. We built Waxctl to provide an interface that would mirror the experience that cloud or serverless platforms provide, but with your resources and your data staying within your network. We are still early on this vision, but it is core to the mission of Bytewax, which is to simplify development on streaming data. The decision to build a peripheral tool set around the core open source project instead of building a hosted version was a particularly important decision for us since we wanted our users to have complete control and feel at ease while running workflows that process sensitive data. With today’s virtualization technology, IaaS options and DevOps tooling, it's possible to build a user experience where you can focus on writing the code that matters (your dataflows) and not on how to configure instances and integrate with a myriad of devops tools. If you still want a more managed service where everything is managed, please [contact us](sales@bytewax.io). Let’s get on with how to use Waxctl!
 
@@ -143,13 +143,36 @@ cat << EOF > bytewax-policy.json
                     "ec2:Region": "us-east-2"
                 }
             }
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreatePolicy",
+                "iam:CreateInstanceProfile",
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:CreatePolicyVersion",
+                "iam:TagPolicy",
+                "iam:TagRole",
+                "iam:TagInstanceProfile",
+                "iam:AddRoleToInstanceProfile",
+                "iam:PassRole",
+                "iam:RemoveRoleFromInstanceProfile",
+                "iam:DeleteInstanceProfile",
+                "iam:DetachRolePolicy",
+                "iam:DeleteRole",
+                "iam:DeletePolicy"
+            ],
+            "Resource": "*"
         }
     ]
 }
 EOF
 ```
 
-Now we can attach the policy
+*A note on the above policy*: The policy above has some permissions that you may not want to enable for something running in a GitHub action. Specifically those iam permissions. In which case you (or your administrator) should create a specific bytewax role with a limited policy attached to it and specify it in the waxctl command with the `--principal-arn` flag. This will limit the requirement of waxctl to create the role.
+
+Continuing on, we can create the policy from the document created above.
 
 ```
 aws iam create-policy --policy-name Bytewax --policy-document file://bytewax-policy.json
@@ -162,7 +185,7 @@ export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output t
 aws iam attach-user-policy --policy-arn arn:aws:iam::$AWS_ACCOUNT_ID:policy/Bytewax --user-name bytewax-actions
 ```
 
-With that done, we can create a aws secret access key and aws access key id:
+With that done, we can create an aws secret access key and aws access key id:
 
 ```
 aws iam create-access-key --user-name bytewax-actions | jq -r .AccessKey.SecretAccessKey
@@ -177,6 +200,15 @@ And set those as secrets in our GitHub repository.
 Now we have what we need to configure a deployment workflow that will run when a PR is closed and new code is merged into main. 
 
 ```
+name: Waxctl Deploy to AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (staging or production)'
+        required: true
+        default: 'staging'
 jobs:
   deploy:
     name: Deploy to EC2
@@ -185,6 +217,10 @@ jobs:
       id-token: write
       contents: read
     steps:
+    - run: |
+          echo "deployment on ${{ github.event.inputs.environment }}"
+          echo "dataflow deployed: https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/dataflow.py"
+          echo "requirements used: https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/requirements.txt"
     - name: Checkout
       uses: actions/checkout@v2
 
@@ -200,15 +236,40 @@ jobs:
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         brew tap bytewax/tap
         brew install waxctl
-
+        mkdir ~/.waxctl
+        echo "collect_telemetry: true" > ~/.waxctl/config.yaml
+        
     - name: Waxctl Deploy
       run: |
-        waxctl aws deploy dataflow.py \
+        flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
+        if [ "$flow" = "wikievents" ];
+        then
+          /home/linuxbrew/.linuxbrew/bin/waxctl aws delete --name wikievents --yes --debug
+          while [ "$flow" = "wikievents" ]
+          do
+            flow=$(/home/linuxbrew/.linuxbrew/bin/waxctl aws ls | grep wikievents | awk '{print $1;}')
+            sleep 2
+          done
+        fi;
+        /home/linuxbrew/.linuxbrew/bin/waxctl aws deploy \
+        https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/dataflow.py \
+        --requirements-file-name https://raw.githubusercontent.com/bytewax/waxctl-sample-aws/${{ github.sha }}/requirements.txt \
         --name wikievents \
-        --requirements-file-name requirements.txt
+        --debug
+        sleep 5
+        /home/linuxbrew/.linuxbrew/bin/waxctl aws ls --verbose
 ```
 
-Walking through the workflow above, what we have done is setup the aws cli with our credentials for the bytewax user and then we have installed waxctl and used it to deploy our workflow. There are many other configurations for things like the type of the instance, security groups, and other advanced configurations. You can see the full list in the [documentation](https://www.bytewax.io/docs/deployment/waxctl-aws#available-aws-sub-commands)
+Walking through the workflow above, what we have done is setup the aws cli with our credentials for the bytewax user and then we have installed waxctl and used it to deploy our workflow. The logic above checks to see if the dataflow with the same name already exists and if it does, it will delete it and then recreate it. Otherwise it will create a new one. There are many other waxctl configurations for things like the type of the instance, security groups, and other advanced configurations. You can see the full list in the [documentation](https://www.bytewax.io/docs/deployment/waxctl-aws#available-aws-sub-commands).
+
+Now we can manually deploy our dataflow from the actions tab in our repo. 
+
+<img width="1661" alt="Screen Shot 2022-10-27 at 10 33 51 AM" src="https://user-images.githubusercontent.com/6073079/198316343-1f7b31fb-e3f3-4949-b8de-c0d923af0356.png">
+
+Upon successful deployment we can see the results in the actions tab for the workflow run.
+
+<img width="1780" alt="Screen Shot 2022-10-27 at 10 32 48 AM" src="https://user-images.githubusercontent.com/6073079/198317460-982f1e61-9373-43b3-8b0a-cd91525e2779.png">
+
 
 ## Monitoring
 
