@@ -18,9 +18,14 @@
                 "iam:CreateInstanceProfile",
                 "iam:CreateRole",
                 "iam:AttachRolePolicy",
-                "iam:CreatePolicyVersion"
+                "iam:CreatePolicyVersion",
+                "iam:TagPolicy",
+                "iam:TagRole",
+                "iam:TagInstanceProfile",
+                "iam:AddRoleToInstanceProfile",
+                "iam:PassRole"
             ],
             "Resource": "*"
-        }      
+        }
     ]
 }
